@@ -1,0 +1,30 @@
+{
+  "name": "dc-game-states",
+  "version": "1.0.0",
+  "description": "Dealer's Choice game states",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --harmony --recursive",
+    "cover": "node --harmony ./node_modules/istanbul-harmony/lib/cli.js cover --hook-run-in-context ./node_modules/mocha/bin/_mocha -- --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ryb73/dealers-choice-game-states.git"
+  },
+  "author": "Ryan Biwer",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/ryb73/dealers-choice-game-states/issues"
+  },
+  "homepage": "https://github.com/ryb73/dealers-choice-game-states",
+  "dependencies": {
+    "lodash": "^3.10.0",
+    "q": "^1.4.1"
+  },
+  "devDependencies": {
+    "chai": "^3.0.0",
+    "chai-as-promised": "^5.1.0",
+    "dc-card-interfaces": "^1.0.0",
+    "dc-test": "^1.0.0"
+  }
+}
