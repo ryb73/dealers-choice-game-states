@@ -137,19 +137,10 @@ describe("PlayerTurnBeginState", function() {
     });
 
     it("plays a dealer's choice card", function() {
-      let deferrals = makeDeferrals(2);
-      let choiceProvider;
-
       let card = gameData.dcDeck.pop();
-      card.play = function(gd, cp, p) {
-        assert.equal(p, players[0]);
-        assert.equal(gd, gameData);
-        assert.equal(cp, choiceProvider);
-        deferrals[0].resolve();
-        return q();
-      };
+      let cardSpy = sinon.spy(card, "play");
 
-      choiceProvider = {
+      let choiceProvider = {
         getTurnChoice: function(gd, p) {
           return q({
             choice: TurnChoice.DcCard,
@@ -162,17 +153,14 @@ describe("PlayerTurnBeginState", function() {
 
       let state = new PlayerTurnBeginState(gameData,
                    choiceProvider, players[0]);
-      state.go()
+      return state.go()
         .then(function(newState) {
           assert.instanceOf(newState, AllowSecondDcCard);
-          // assert.equal(players[0].dcCards.length, 0);
-          deferrals[1].resolve();
-        })
-        .catch(deferrals[1].reject);
-
-      return q.all(deferrals.map(function(deferred) {
-        return deferred.promise;
-      }));
+          assert.equal(players[0].dcCards.length, 0);
+          assert.ok(cardSpy.calledOnce);
+          assert.ok(cardSpy.calledWith(gameData, choiceProvider,
+                                        players[0]));
+        });
     });
 
     it("buys a car from the auto exchange", function() {
@@ -254,39 +242,24 @@ describe("AllowSecondDcCard", function() {
       let deckConfig = mockDeckConfig(1, 0, 0);
       let gameData = new GameData(players, deckConfig);
 
-      let deferrals = makeDeferrals(2);
-      let choiceProvider;
-
       let card = gameData.dcDeck.pop();
-      card.play = function(gd, cp, p) {
-        assert.equal(p, players[0]);
-        assert.equal(gd, gameData);
-        assert.equal(cp, choiceProvider);
-        deferrals[0].resolve();
-        return q();
-      };
-
-      choiceProvider = {
-        pickSecondDcCard: function(gd, p) {
-          return q(card);
-        }
-      };
-
+      let cardSpy = sinon.spy(card, "play");
       players[0].gainDcCard(card);
+
+      let choiceProvider = {
+        pickSecondDcCard: sinon.stub().returns(q(card))
+      };
 
       let state = new AllowSecondDcCard(gameData,
                    choiceProvider, players[0]);
-      state.go()
+      return state.go()
         .then(function(newState) {
           assert.instanceOf(newState, AllowOpenLot);
-          // assert.equal(players[0].dcCards.length, 0);
-          deferrals[1].resolve();
-        })
-        .catch(deferrals[1].reject);
-
-      return q.all(deferrals.map(function(deferred) {
-        return deferred.promise;
-      }));
+          assert.equal(players[0].dcCards.length, 0);
+          assert.ok(cardSpy.calledOnce, "play called once");
+          assert.ok(cardSpy.calledWith(gameData, choiceProvider,
+                                        players[0]), "calledWith");
+        });
     });
 
     it("allows the player to not play a second card", function() {
@@ -295,9 +268,7 @@ describe("AllowSecondDcCard", function() {
       let gameData = new GameData(players, deckConfig);
 
       let choiceProvider = {
-        pickSecondDcCard: function(gd, p) {
-          return q(null);
-        }
+        pickSecondDcCard: sinon.stub().returns(q(null))
       };
 
       let state = new AllowSecondDcCard(gameData,
