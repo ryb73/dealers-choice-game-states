@@ -25,6 +25,9 @@
     "chai": "^3.0.0",
     "chai-as-promised": "^5.1.0",
     "dc-card-interfaces": "^1.0.0",
-    "dc-test": "^1.0.0"
+    "dc-test": "^1.0.2",
+    "istanbul-harmony": "^0.3.16",
+    "mocha": "^2.2.5",
+    "sinon": "^1.15.4"
   }
 }

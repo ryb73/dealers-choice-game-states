@@ -3,6 +3,7 @@
 
 const chai                      = require("chai"),
       chaiAsPromised            = require("chai-as-promised"),
+      sinon                     = require("sinon"),
       q                         = require("q"),
       _                         = require("lodash"),
       dcTest                    = require("dc-test"),
@@ -104,12 +105,20 @@ describe("CheckReplenish", function() {
 });
 
 describe("PlayerTurnBeginState", function() {
+  let players, deckConfig, gameData;
+
+  beforeEach(function() {
+    players = initPlayers(3);
+    deckConfig = mockDeckConfig(6, 1, 1);
+    gameData = new GameData(players, deckConfig);
+  });
+
+  afterEach(function() {
+    players = deckConfig = gameData = null;
+  });
+
   describe("go", function() {
     it("requests a turn choice with the proper arguments", function(done) {
-      let players = initPlayers(3);
-      let deckConfig = mockDeckConfig(0, 0, 0);
-      let gameData = new GameData(players, deckConfig);
-
       let choiceProvider = {
         getTurnChoice: function(gd, p) {
           assert.equal(gd, gameData);
@@ -128,21 +137,16 @@ describe("PlayerTurnBeginState", function() {
     });
 
     it("plays a dealer's choice card", function() {
-      let players = initPlayers(3);
-      let deckConfig = mockDeckConfig(0, 0, 0);
-      let gameData = new GameData(players, deckConfig);
+      let deferrals = makeDeferrals(2);
       let choiceProvider;
 
-      let deferrals = makeDeferrals(2);
-
-      let card = {
-        play: function(p, gd, cp) {
-          assert.equal(p, players[0]);
-          assert.equal(gd, gameData);
-          assert.equal(cp, choiceProvider);
-          deferrals[0].resolve();
-          return q(1);
-        }
+      let card = gameData.dcDeck.pop();
+      card.play = function(gd, cp, p) {
+        assert.equal(p, players[0]);
+        assert.equal(gd, gameData);
+        assert.equal(cp, choiceProvider);
+        deferrals[0].resolve();
+        return q();
       };
 
       choiceProvider = {
@@ -154,11 +158,14 @@ describe("PlayerTurnBeginState", function() {
         }
       };
 
+      players[0].gainDcCard(card);
+
       let state = new PlayerTurnBeginState(gameData,
                    choiceProvider, players[0]);
       state.go()
         .then(function(newState) {
           assert.instanceOf(newState, AllowSecondDcCard);
+          // assert.equal(players[0].dcCards.length, 0);
           deferrals[1].resolve();
         })
         .catch(deferrals[1].reject);
@@ -169,10 +176,6 @@ describe("PlayerTurnBeginState", function() {
     });
 
     it("buys a car from the auto exchange", function() {
-      let players = initPlayers(3);
-      let deckConfig = mockDeckConfig(0, 0, 1);
-      let gameData = new GameData(players, deckConfig);
-
       let choiceProvider = {
         getTurnChoice: function(gd, p) {
           return q({
@@ -190,6 +193,119 @@ describe("PlayerTurnBeginState", function() {
         assert.equal(players[0].money, 6000);
         assert.instanceOf(newState, AllowOpenLot);
       });
+    });
+
+    it("buys an insurance", function() {
+      let choiceProvider = {
+        getTurnChoice: function(gd, p) {
+          return q({
+            choice: TurnChoice.BuyInsurance
+          });
+        }
+      };
+
+      let state = new PlayerTurnBeginState(gameData,
+                   choiceProvider, players[0]);
+      return state.go().then(function(newState) {
+        assert.equal(players[0].insurances.length, 1);
+        assert.equal(players[0].money, 6000);
+        assert.instanceOf(newState, AllowOpenLot);
+      });
+    });
+
+    it("refreshes the hand", function() {
+      let choiceProvider = {
+        getTurnChoice: function(gd, p) {
+          return q({
+            choice: TurnChoice.RefreshHand
+          });
+        }
+      };
+
+      // Give the player three cards. Later we'll compare these
+      // three to the ones the player has after the refresh
+      let originalCards = [];
+      _.times(3, function() {
+        let card = gameData.dcDeck.pop();
+        originalCards.push(card);
+        players[0].gainDcCard(card);
+      });
+
+      let state = new PlayerTurnBeginState(gameData,
+                   choiceProvider, players[0]);
+      return state.go().then(function(newState) {
+        assert.equal(players[0].dcCards.length, 3);
+
+        assert.notOk(_.any(
+          players[0].dcCards,
+          _.contains.bind(_, originalCards)
+        ));
+
+        assert.instanceOf(newState, AllowOpenLot);
+      });
+    });
+  });
+});
+
+describe("AllowSecondDcCard", function() {
+  describe("go", function() {
+    it("allows the player to play a second card", function() {
+      let players = initPlayers(3);
+      let deckConfig = mockDeckConfig(1, 0, 0);
+      let gameData = new GameData(players, deckConfig);
+
+      let deferrals = makeDeferrals(2);
+      let choiceProvider;
+
+      let card = gameData.dcDeck.pop();
+      card.play = function(gd, cp, p) {
+        assert.equal(p, players[0]);
+        assert.equal(gd, gameData);
+        assert.equal(cp, choiceProvider);
+        deferrals[0].resolve();
+        return q();
+      };
+
+      choiceProvider = {
+        pickSecondDcCard: function(gd, p) {
+          return q(card);
+        }
+      };
+
+      players[0].gainDcCard(card);
+
+      let state = new AllowSecondDcCard(gameData,
+                   choiceProvider, players[0]);
+      state.go()
+        .then(function(newState) {
+          assert.instanceOf(newState, AllowOpenLot);
+          // assert.equal(players[0].dcCards.length, 0);
+          deferrals[1].resolve();
+        })
+        .catch(deferrals[1].reject);
+
+      return q.all(deferrals.map(function(deferred) {
+        return deferred.promise;
+      }));
+    });
+
+    it("allows the player to not play a second card", function() {
+      let players = initPlayers(3);
+      let deckConfig = mockDeckConfig(0, 0, 0);
+      let gameData = new GameData(players, deckConfig);
+
+      let choiceProvider = {
+        pickSecondDcCard: function(gd, p) {
+          return q(null);
+        }
+      };
+
+      let state = new AllowSecondDcCard(gameData,
+                   choiceProvider, players[0]);
+      return state.go()
+        .then(function(newState) {
+          assert.instanceOf(newState, AllowOpenLot);
+        });
     });
   });
 });
