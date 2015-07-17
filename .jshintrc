@@ -5,7 +5,7 @@
   "predef": [ "-console" ],
 
   "nocomma": false,
-  "unused": true,
+  "unused": "vars",
   "bitwise": true,
   "eqeqeq": true,
   "latedef": "nofunc",

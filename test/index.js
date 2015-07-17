@@ -21,7 +21,9 @@ const chai                      = require("chai"),
       CheckReplenish            = gameStates.CheckReplenish,
       PlayerTurnBeginState      = gameStates.PlayerTurnBeginState,
       AllowOpenLot              = gameStates.AllowOpenLot,
-      AllowSecondDcCard         = gameStates.AllowSecondDcCard;
+      AllowSecondDcCard         = gameStates.AllowSecondDcCard,
+      LotOpen                   = gameStates.LotOpen,
+      TurnOver                  = gameStates.TurnOver;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -281,18 +283,54 @@ describe("AllowSecondDcCard", function() {
   });
 });
 
+describe("AllowOpenLot", function() {
+  describe("go", function() {
+    it("opens the lot if requested", function() {
+      let player = {};
+      let choiceProvider = { allowOpenLot: function() {} };
+      let gameData = {};
+
+      let cpMock = sinon.mock(choiceProvider);
+      cpMock.expects("allowOpenLot")
+        .once()
+        .withArgs(player)
+        .returns(q(true));
+
+      let state = new AllowOpenLot(gameData, choiceProvider,
+                                    player);
+      return state.go()
+        .then(function(newState) {
+          assert.instanceOf(newState, LotOpen);
+          cpMock.verify();
+        });
+    });
+
+    it("doesn't open the lot if that's what you really want", function() {
+      let player = {};
+      let choiceProvider = { allowOpenLot: function() {} };
+      let gameData = {};
+
+      let cpMock = sinon.mock(choiceProvider);
+      cpMock.expects("allowOpenLot")
+        .once()
+        .withArgs(player)
+        .returns(q(false));
+
+      let state = new AllowOpenLot(gameData, choiceProvider,
+                                    player);
+      return state.go()
+        .then(function(newState) {
+          assert.instanceOf(newState, TurnOver);
+          cpMock.verify();
+        });
+    });
+  });
+});
+
 function initPlayers(num) {
   let players = [];
   _.times(num, function() {
     players.push(new Player(10000));
   });
   return players;
-}
-
-function makeDeferrals(n) {
-  let result = new Array(n);
-  for(let i = 0; i < n; ++i) {
-    result[i] = q.defer();
-  }
-  return result;
 }
