@@ -56,7 +56,7 @@ function doSetup(option) {
   let gameData = new GameData([ player ], deckConfig);
 
   let choiceProvider = {
-    chooseBuyFromAutoExchangeOption: function(p) {
+    doBuyFromExchange: function(p) {
       assert.equal(p, player);
       return q(option);
     }

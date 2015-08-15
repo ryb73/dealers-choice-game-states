@@ -11,6 +11,7 @@ const chai                      = require("chai"),
       dcEngine                  = require("dc-engine"),
       Player                    = dcEngine.Player,
       GameData                  = dcEngine.GameData,
+      Offer                     = dcEngine.Offer,
       cardTypes                 = require("dc-card-interfaces"),
       Car                       = cardTypes.Car,
       dcConstants               = require("dc-constants"),
@@ -23,7 +24,8 @@ const chai                      = require("chai"),
       AllowOpenLot              = gameStates.AllowOpenLot,
       AllowSecondDcCard         = gameStates.AllowSecondDcCard,
       LotOpen                   = gameStates.LotOpen,
-      TurnOver                  = gameStates.TurnOver;
+      TurnOver                  = gameStates.TurnOver,
+      Bidding                   = gameStates.Bidding;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -89,7 +91,7 @@ describe("CheckReplenish", function() {
       let gameData = new GameData(players, deckConfig);
 
       let choiceProvider = {
-        chooseBuyFromAutoExchangeOption: function(player) {
+        doBuyFromExchange: function(player) {
           assert.equal(player, players[0]);
           return q(BuyFromAutoExchangeOption.FourThou);
         }
@@ -122,8 +124,7 @@ describe("PlayerTurnBeginState", function() {
   describe("go", function() {
     it("requests a turn choice with the proper arguments", function(done) {
       let choiceProvider = {
-        getTurnChoice: function(gd, p) {
-          assert.equal(gd, gameData);
+        getTurnChoice: function(p) {
           assert.equal(p, players[0]);
           done();
           return q({
@@ -172,7 +173,7 @@ describe("PlayerTurnBeginState", function() {
             choice: TurnChoice.BuyCar
           });
         },
-        chooseBuyFromAutoExchangeOption:
+        doBuyFromExchange:
           q.bind(null, BuyFromAutoExchangeOption.FourThou)
       };
 
@@ -288,19 +289,39 @@ describe("AllowSecondDcCard", function() {
 
 describe("AllowOpenLot", function() {
   describe("go", function() {
-    it("opens the lot if requested", function() {
-      let player = {};
-      let choiceProvider = { allowOpenLot: function() {} };
-      let gameData = {};
+    let player, choiceProvider, gameData, cpMock, state;
+    beforeEach(function() {
+      player = new Player(1000);
+      choiceProvider = { allowOpenLot: function() {} };
+      gameData = {};
+      cpMock = sinon.mock(choiceProvider);
 
-      let cpMock = sinon.mock(choiceProvider);
+      state = new AllowOpenLot(gameData, choiceProvider,
+                                    player);
+    });
+
+    afterEach(function() {
+      player = choiceProvider = gameData = cpMock = state = null;
+    });
+
+    it("doesn't give the option if player has no cars", function() {
+      cpMock.expects("allowOpenLot").never();
+
+      return state.go()
+        .then(function(newState) {
+          assert.instanceOf(newState, TurnOver);
+          cpMock.verify();
+        });
+    });
+
+    it("opens the lot if requested", function() {
+      player.gainCar({});
+
       cpMock.expects("allowOpenLot")
         .once()
         .withArgs(player)
         .returns(q(true));
 
-      let state = new AllowOpenLot(gameData, choiceProvider,
-                                    player);
       return state.go()
         .then(function(newState) {
           assert.instanceOf(newState, LotOpen);
@@ -309,18 +330,13 @@ describe("AllowOpenLot", function() {
     });
 
     it("doesn't open the lot if that's what you really want", function() {
-      let player = {};
-      let choiceProvider = { allowOpenLot: function() {} };
-      let gameData = {};
+      player.gainCar({});
 
-      let cpMock = sinon.mock(choiceProvider);
       cpMock.expects("allowOpenLot")
         .once()
         .withArgs(player)
         .returns(q(false));
 
-      let state = new AllowOpenLot(gameData, choiceProvider,
-                                    player);
       return state.go()
         .then(function(newState) {
           assert.instanceOf(newState, TurnOver);
@@ -328,6 +344,58 @@ describe("AllowOpenLot", function() {
         });
     });
   });
+});
+
+describe("LotOpen", function() {
+  describe("go", function() {
+    let seller, buyer, choiceProvider, cpMock, state;
+
+    beforeEach(function() {
+      seller = new Player(1000);
+      buyer = new Player(1000);
+
+      choiceProvider = { allowBids: function() {} };
+      cpMock = sinon.mock(choiceProvider);
+
+      state = new LotOpen({}, choiceProvider, seller);
+    });
+
+    afterEach(function() {
+      seller = buyer = choiceProvider = cpMock = state = null;
+    });
+
+    it("finishes turn if player has no car", function() {
+      cpMock.expects("allowBids").never();
+
+      return state.go()
+        .then(function(newState) {
+          assert.instanceOf(newState, TurnOver);
+          cpMock.verify();
+        });
+    });
+
+    it("enters bidding for the specified car", function() {
+      let car = new Car(0, 0);
+      seller.gainCar(car);
+
+      let offer = new Offer(buyer, seller, car, 100);
+
+      cpMock.expects("allowBids")
+        .once()
+        .withArgs(seller)
+        .returns(q(offer));
+
+      return state.go()
+        .then(function(newState) {
+          assert.instanceOf(newState, Bidding);
+          cpMock.verify();
+        });
+    });
+  });
+});
+
+describe("Bidding", function() {
+
 });
 
 function initPlayers(num) {
