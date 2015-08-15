@@ -60,7 +60,7 @@ describe("LotOpen", function() {
 
     it("enters bidding for the specified car", function() {
       let car = new Car(0, 0);
-      seller.gainCar(car);
+      seller.buyCar(car, 0);
 
       let offer = new Offer(buyer, seller, car, 100);
 

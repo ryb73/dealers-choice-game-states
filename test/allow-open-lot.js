@@ -58,7 +58,7 @@ describe("AllowOpenLot", function() {
     });
 
     it("opens the lot if requested", function() {
-      player.gainCar({});
+      player.buyCar({}, 0);
 
       cpMock.expects("allowOpenLot")
         .once()
@@ -73,7 +73,7 @@ describe("AllowOpenLot", function() {
     });
 
     it("doesn't open the lot if that's what you really want", function() {
-      player.gainCar({});
+      player.buyCar({}, 0);
 
       cpMock.expects("allowOpenLot")
         .once()

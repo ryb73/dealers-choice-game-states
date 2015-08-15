@@ -35,8 +35,8 @@ describe("CheckReplenish", function() {
     it("goes to the next state if no need to replenish", function() {
       // Player has two cars -- no need to replenish
       let players = initPlayers(3);
-      players[0].gainCar(new Car(0, 0));
-      players[0].gainCar(new Car(1, 0));
+      players[0].buyCar(new Car(0, 0), 0);
+      players[0].buyCar(new Car(1, 0), 0);
 
       let deckConfig = mockDeckConfig(0, 0, 2);
       let gameData = new GameData(players, deckConfig);
