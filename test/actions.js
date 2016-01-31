@@ -7,8 +7,7 @@ const chai                      = require("chai"),
       dcEngine                  = require("dc-engine"),
       Player                    = dcEngine.Player,
       GameData                  = dcEngine.GameData,
-      cardTypes                 = require("dc-card-interfaces"),
-      Car                       = cardTypes.Car,
+      Car                       = dcEngine.Car,
       buyFromAutoExchange       = require("../lib/actions/buy-from-auto-exchange"),
       BuyFromAutoExchangeOption = require("dc-constants").BuyFromAutoExchangeOption;
 

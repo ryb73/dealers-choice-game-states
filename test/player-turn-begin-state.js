@@ -11,21 +11,13 @@ const chai                      = require("chai"),
       dcEngine                  = require("dc-engine"),
       Player                    = dcEngine.Player,
       GameData                  = dcEngine.GameData,
-      Offer                     = dcEngine.Offer,
-      cardTypes                 = require("dc-card-interfaces"),
-      Car                       = cardTypes.Car,
       dcConstants               = require("dc-constants"),
       BuyFromAutoExchangeOption = dcConstants.BuyFromAutoExchangeOption,
       TurnChoice                = dcConstants.TurnChoice,
       gameStates                = require(".."),
-      BeginningState            = gameStates.BeginningState,
-      CheckReplenish            = gameStates.CheckReplenish,
       PlayerTurnBeginState      = gameStates.PlayerTurnBeginState,
       AllowOpenLot              = gameStates.AllowOpenLot,
-      AllowSecondDcCard         = gameStates.AllowSecondDcCard,
-      LotOpen                   = gameStates.LotOpen,
-      TurnOver                  = gameStates.TurnOver,
-      Bidding                   = gameStates.Bidding;
+      AllowSecondDcCard         = gameStates.AllowSecondDcCard;
 
 chai.use(chaiAsPromised);
 const assert = chai.assert;
