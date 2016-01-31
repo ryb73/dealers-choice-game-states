@@ -136,17 +136,16 @@ describe("PlayerTurnBeginState", function() {
         players[0].gainDcCard(card);
       });
 
-      let state = new PlayerTurnBeginState(gameData,
-                   choiceProvider, players[0]);
+      let state = new PlayerTurnBeginState(gameData, choiceProvider, players[0]);
       return state.go().then(function(newState) {
         assert.equal(players[0].dcCards.size, 3);
 
         // Make sure none of the cards the player
         // originally had are still in the player's
         // hand
-        assert.notOk(_.any(
+        assert.notOk(_.some(
           players[0].dcCards,
-          _.contains.bind(_, originalCards)
+          _.includes.bind(_, originalCards)
         ));
 
         assert.instanceOf(newState, AllowOpenLot);

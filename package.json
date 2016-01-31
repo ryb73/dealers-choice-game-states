@@ -18,12 +18,12 @@
   },
   "homepage": "https://github.com/ryb73/dealers-choice-game-states",
   "dependencies": {
-    "lodash": "^3.10.0",
+    "lodash": "4.1.0",
     "q": "^1.4.1"
   },
   "devDependencies": {
-    "chai": "^3.0.0",
-    "chai-as-promised": "^5.1.0",
+    "chai": "3.5.0",
+    "chai-as-promised": "5.2.0",
     "dc-test": "^1.0.2",
     "istanbul-harmony": "^0.3.16",
     "mocha": "^2.2.5",
