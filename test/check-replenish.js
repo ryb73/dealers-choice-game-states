@@ -31,7 +31,7 @@ describe("CheckReplenish", function() {
       let deckConfig = mockDeckConfig(0, 0, 2);
       let gameData = new GameData(players, deckConfig);
 
-      let state = new CheckReplenish(gameData, {}, players[0]);
+      let state = new CheckReplenish(gameData, {}, 0);
       return state.go().then(function(newState) {
         assert.instanceOf(newState, PlayerTurnBeginState);
 
@@ -45,7 +45,7 @@ describe("CheckReplenish", function() {
       let deckConfig = mockDeckConfig(0, 0, 0);
       let gameData = new GameData(players, deckConfig);
 
-      let state = new CheckReplenish(gameData, {}, players[0]);
+      let state = new CheckReplenish(gameData, {}, 0);
       return state.go().then(function(newState) {
         assert.instanceOf(newState, PlayerTurnBeginState);
 
@@ -64,8 +64,7 @@ describe("CheckReplenish", function() {
         }
       };
 
-      let state = new CheckReplenish(gameData, choiceProvider,
-                                      players[0]);
+      let state = new CheckReplenish(gameData, choiceProvider, 0);
       return state.go().then(function(newState) {
         assert.instanceOf(newState, CheckReplenish);
         assert.equal(players[0].cars.size, 1);

@@ -11,5 +11,6 @@ states.LotOpen = require("./lib/lot-open");
 states.MakeCounterOffer = require("./lib/make-counter-offer");
 states.PlayerTurnBeginState = require("./lib/player-turn-begin-state");
 states.TurnOver = require("./lib/turn-over");
+states.InitialDeal = require("./lib/initial-deal");
 
 module.exports = states;
