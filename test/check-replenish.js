@@ -67,7 +67,7 @@ describe("CheckReplenish", function() {
       let state = new CheckReplenish(gameData, choiceProvider, 0);
       return state.go().then(function(newState) {
         assert.instanceOf(newState, CheckReplenish);
-        assert.equal(players[0].cars.size, 1);
+        assert.equal(players[0].cars.length, 1);
         assert.equal(players[0].money, 6000);
       });
     });

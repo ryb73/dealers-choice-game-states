@@ -73,7 +73,7 @@ describe("PlayerTurnBeginState", function() {
       return state.go()
         .then(function(newState) {
           assert.instanceOf(newState, AllowSecondDcCard);
-          assert.equal(players[0].dcCards.size, 0);
+          assert.equal(players[0].dcCards.length, 0);
           assert.ok(cardSpy.calledOnce);
           assert.ok(cardSpy.calledWith(gameData, choiceProvider,
                                         players[0]));
@@ -94,7 +94,7 @@ describe("PlayerTurnBeginState", function() {
       let state = new PlayerTurnBeginState(gameData,
                    choiceProvider, players[0]);
       return state.go().then(function(newState) {
-        assert.equal(players[0].cars.size, 1);
+        assert.equal(players[0].cars.length, 1);
         assert.equal(players[0].money, 6000);
         assert.instanceOf(newState, AllowOpenLot);
       });
@@ -112,7 +112,7 @@ describe("PlayerTurnBeginState", function() {
       let state = new PlayerTurnBeginState(gameData,
                    choiceProvider, players[0]);
       return state.go().then(function(newState) {
-        assert.equal(players[0].insurances.size, 1);
+        assert.equal(players[0].insurances.length, 1);
         assert.equal(players[0].money, 6000);
         assert.instanceOf(newState, AllowOpenLot);
       });
@@ -138,7 +138,7 @@ describe("PlayerTurnBeginState", function() {
 
       let state = new PlayerTurnBeginState(gameData, choiceProvider, players[0]);
       return state.go().then(function(newState) {
-        assert.equal(players[0].dcCards.size, 3);
+        assert.equal(players[0].dcCards.length, 3);
 
         // Make sure none of the cards the player
         // originally had are still in the player's

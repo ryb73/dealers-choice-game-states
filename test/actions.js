@@ -22,7 +22,7 @@ describe("buyFromAutoExchange", function() {
       setup.choiceProvider, setup.player)
         .then(function() {
           assert.equal(setup.player.money, 2000);
-          assert.equal(setup.player.cars.size, 1);
+          assert.equal(setup.player.cars.length, 1);
           assert.equal(setup.gameData.carDeck.remaining, 0);
         });
   });
@@ -34,7 +34,7 @@ describe("buyFromAutoExchange", function() {
       setup.choiceProvider, setup.player)
         .then(function() {
           assert.equal(setup.player.money, 1000);
-          assert.equal(setup.player.cars.size, 1);
+          assert.equal(setup.player.cars.length, 1);
           assert.equal(setup.gameData.carDeck.remaining, 0);
         });
   });
