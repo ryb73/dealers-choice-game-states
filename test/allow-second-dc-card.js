@@ -38,7 +38,7 @@ describe("AllowSecondDcCard", function() {
       return state.go()
         .then(function(newState) {
           assert.instanceOf(newState, AllowOpenLot);
-          assert.equal(players[0].dcCards.length, 0);
+          assert.equal(_.size(players[0].dcCards), 0);
           assert.ok(cardSpy.calledOnce, "play called once");
           assert.ok(cardSpy.calledWith(gameData, choiceProvider,
                                         players[0]), "calledWith");

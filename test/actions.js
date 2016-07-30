@@ -4,6 +4,7 @@
 const chai                      = require("chai"),
       chaiAsPromised            = require("chai-as-promised"),
       q                         = require("q"),
+      _                         = require("lodash"),
       dcEngine                  = require("dc-engine"),
       Player                    = dcEngine.Player,
       GameData                  = dcEngine.GameData,
@@ -22,7 +23,7 @@ describe("buyFromAutoExchange", function() {
       setup.choiceProvider, setup.player)
         .then(function() {
           assert.equal(setup.player.money, 2000);
-          assert.equal(setup.player.cars.length, 1);
+          assert.equal(_.size(setup.player.cars), 1);
           assert.equal(setup.gameData.carDeck.remaining, 0);
         });
   });
@@ -34,7 +35,7 @@ describe("buyFromAutoExchange", function() {
       setup.choiceProvider, setup.player)
         .then(function() {
           assert.equal(setup.player.money, 1000);
-          assert.equal(setup.player.cars.length, 1);
+          assert.equal(_.size(setup.player.cars), 1);
           assert.equal(setup.gameData.carDeck.remaining, 0);
         });
   });
