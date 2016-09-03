@@ -33,15 +33,16 @@ describe("AllowSecondDcCard", function() {
         pickSecondDcCard: sinon.stub().returns(q(card))
       };
 
-      let state = new AllowSecondDcCard(gameData,
-                   choiceProvider, players[0]);
+      let state = new AllowSecondDcCard(gameData, choiceProvider, players[0]);
       return state.go()
         .then(function(newState) {
           assert.instanceOf(newState, AllowOpenLot);
           assert.equal(_.size(players[0].dcCards), 0);
           assert.ok(cardSpy.calledOnce, "play called once");
-          assert.ok(cardSpy.calledWith(gameData, choiceProvider,
-                                        players[0]), "calledWith");
+          assert.ok(
+            cardSpy.calledWith(gameData, choiceProvider, players[0]),
+            "calledWith"
+          );
         });
     });
 
@@ -54,8 +55,7 @@ describe("AllowSecondDcCard", function() {
         pickSecondDcCard: sinon.stub().returns(q(null))
       };
 
-      let state = new AllowSecondDcCard(gameData,
-                   choiceProvider, players[0]);
+      let state = new AllowSecondDcCard(gameData, choiceProvider, players[0]);
       return state.go()
         .then(function(newState) {
           assert.instanceOf(newState, AllowOpenLot);
